@@ -1,0 +1,105 @@
+{
+  "name": "R003 bad",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "orders",
+        "authentication": "headerAuth"
+      },
+      "name": "Receive order",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "11111111-2222-3333-4444-555555555555"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.invalid/orders",
+        "method": "GET"
+      },
+      "name": "Fetch order from billing API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://crm.example.invalid/customers"
+      },
+      "name": "Fetch customer from CRM API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://erp.example.invalid/push"
+      },
+      "name": "Push result to ERP API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Receive order": {
+      "main": [
+        [
+          {
+            "node": "Fetch order from billing API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch order from billing API": {
+      "main": [
+        [
+          {
+            "node": "Fetch customer from CRM API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch customer from CRM API": {
+      "main": [
+        [
+          {
+            "node": "Push result to ERP API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "errwf0001"
+  }
+}
